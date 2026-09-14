@@ -153,7 +153,35 @@ class Theme:
                 selection-background-color: #2a82da;
                 selection-color: white;
             }
-            
+
+            /* Scrollbar */
+            QScrollBar:vertical {
+                background: #1a1a1a;
+                width: 14px;
+                margin: 0px;
+                border: none;
+            }
+
+            QScrollBar::handle:vertical {
+                background: #2a82da;
+                min-height: 30px;
+                border-radius: 6px;
+            }
+
+            QScrollBar::handle:vertical:hover {
+                background: #3294ea;
+            }
+
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                height: 0px;
+                background: none;
+                border: none;
+            }
+
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+                background: none;
+            }
+
             /* Tooltips */
             QToolTip {
                 background-color: #353535;

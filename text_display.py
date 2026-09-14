@@ -19,7 +19,7 @@ class ScrollableTextEdit(QTextEdit):
         
     def setup_display(self, font_size, font_family):
         self.setReadOnly(True)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.setFont(QFont(font_family, font_size))
         self.setPlaceholderText("Load a text file to begin...")
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)

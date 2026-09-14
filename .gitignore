@@ -1,0 +1,41 @@
+# Local dev tooling artifacts
+.claude/
+.claude/**
+*.local.md
+**/.claude.json
+**/*.claude.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Secrets / credentials
+.env
+.env.*
+*.pem
+*.key
+*credentials*.json
+*secrets*
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Logs / backups
+*.log
+*.bak
+backups/

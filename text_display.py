@@ -43,17 +43,15 @@ class ScrollableTextEdit(QTextEdit):
         self.set_alignment(self.alignment())
         
     def set_alignment(self, alignment):
-        # Create text block format with desired alignment
+        # Reformat via a cursor bound to the document itself, not the
+        # widget's visible cursor. Using self.textCursor() + setTextCursor()
+        # here would leave the visible cursor at the end of the document
+        # (clearSelection() after a document-wide select collapses to the
+        # selection's end) and Qt auto-scrolls to keep it visible, which
+        # jerked the view to the bottom on every alignment change.
         text_block_format = QTextBlockFormat()
         text_block_format.setAlignment(alignment)
-        
-        # Create cursor and select all text
-        cursor = self.textCursor()
+
+        cursor = QTextCursor(self.document())
         cursor.select(QTextCursor.SelectionType.Document)
-        
-        # Apply the formatting
         cursor.mergeBlockFormat(text_block_format)
-        
-        # Clear selection and update cursor
-        cursor.clearSelection()
-        self.setTextCursor(cursor)

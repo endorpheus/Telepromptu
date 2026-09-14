@@ -131,7 +131,9 @@ class TeleprompterWindow(QMainWindow):
         self.control_panel.speed_slider.setValue(new_speed)
 
     def update_font_size(self, size):
-        self.text_display.setFont(QFont(self.text_display.font().family(), size))
+        self._change_preserving_scroll(
+            lambda: self.text_display.setFont(QFont(self.text_display.font().family(), size))
+        )
 
     def adjust_font_size(self, delta):
         current_size = self.control_panel.font_size_spin.value()
@@ -139,7 +141,25 @@ class TeleprompterWindow(QMainWindow):
         self.control_panel.font_size_spin.setValue(new_size)
 
     def update_font_family(self, family):
-        self.text_display.setFont(QFont(family, self.text_display.font().pointSize()))
+        self._change_preserving_scroll(
+            lambda: self.text_display.setFont(QFont(family, self.text_display.font().pointSize()))
+        )
+
+    def _change_preserving_scroll(self, change_func):
+        # Changing font size/family reflows the document and shifts its
+        # total pixel height, so the scrollbar's raw pixel value used to
+        # point somewhere else entirely after the change (often clamped
+        # straight to the bottom). Preserve position as a fraction of the
+        # document instead.
+        scrollbar = self.text_display.verticalScrollBar()
+        max_before = scrollbar.maximum()
+        fraction = scrollbar.value() / max_before if max_before > 0 else 0.0
+
+        change_func()
+
+        scrollbar = self.text_display.verticalScrollBar()
+        scrollbar.setValue(int(fraction * scrollbar.maximum()))
+        self.update_progress()
 
     def update_alignment(self, alignment):
         self.text_display.set_alignment(alignment)

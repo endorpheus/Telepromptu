@@ -17,8 +17,9 @@ class TeleprompterWindow(QMainWindow):
 
     def init_variables(self):
         self.is_playing = False
-        self.base_scroll_speed = 50
-        self.scroll_amount = 1
+        self.tick_interval = 20  # ms, fixed tick rate for smooth animation
+        self.scroll_pixels_per_sec = 0
+        self.scroll_accumulator = 0.0
         self.scroll_timer = QTimer()
         self.scroll_timer.timeout.connect(self.scroll_text)
         self.manual_scroll_step = 20
@@ -33,7 +34,8 @@ class TeleprompterWindow(QMainWindow):
         self.text_display = ScrollableTextEdit()
         self.control_panel = ControlPanel()
         self.connect_signals()
-        
+        self.update_speed(self.control_panel.speed_slider.value())
+
         layout.addWidget(self.control_panel)
         layout.addWidget(self.text_display)
 
@@ -76,7 +78,8 @@ class TeleprompterWindow(QMainWindow):
                 self.is_playing = False
                 self.control_panel.update_play_button_state(False, self.style())
                 return
-            self.scroll_timer.start(self.base_scroll_speed)
+            self.scroll_accumulator = 0.0
+            self.scroll_timer.start(self.tick_interval)
         else:
             self.scroll_timer.stop()
 
@@ -87,8 +90,12 @@ class TeleprompterWindow(QMainWindow):
             self.control_panel.update_play_button_state(False, self.style())
             self.scroll_timer.stop()
         else:
-            scrollbar.setValue(scrollbar.value() + self.scroll_amount)
-            self.update_progress()
+            self.scroll_accumulator += self.scroll_pixels_per_sec * (self.tick_interval / 1000)
+            step = int(self.scroll_accumulator)
+            if step > 0:
+                self.scroll_accumulator -= step
+                scrollbar.setValue(scrollbar.value() + step)
+                self.update_progress()
 
     def scroll_up(self):
         scrollbar = self.text_display.verticalScrollBar()
@@ -111,9 +118,12 @@ class TeleprompterWindow(QMainWindow):
         self.control_panel.play_button.setFocus()
 
     def update_speed(self, value):
-        self.base_scroll_speed = int(110 - value)
-        if self.is_playing:
-            self.scroll_timer.setInterval(self.base_scroll_speed)
+        # value: 10 (slow) to 100 (fast) from the slider.
+        # Scale pixels-per-second directly so the whole range is clearly
+        # perceptible, instead of only varying the timer tick interval
+        # (which capped total speed at 100px/sec and made changes barely
+        # noticeable).
+        self.scroll_pixels_per_sec = value * 5
 
     def adjust_speed(self, delta):
         current_speed = self.control_panel.speed_slider.value()
